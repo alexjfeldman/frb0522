@@ -1,0 +1,29 @@
+case class PII_Scoring_DF(Table_Name : String, Column_Name : String, IP_Percentage : Long, Time_Percentage : Long, Phone_Percentage : Long, Link_Percentage : Long, Date_Percentage : Long, Email_Percentage : Long, PII_Flag : String, Review_Flag : String, Encryption_Type : String, update_user_name : String, update_time_stamp : Long)
+
+val seqArray = Array(Seq(PII_Scoring_DF("Bike_Status", "bikes_available", "0".toLong, "0".toLong, "0".toLong, "0".toLong, "0".toLong, "0".toLong, "False", "False", "not_defined", "Bill_Murray", "20180425".toLong)),
+Seq(PII_Scoring_DF("Bike_Status", "docks_available", "0".toLong, "0".toLong, "0".toLong, "0".toLong, "0".toLong, "0".toLong, "False", "False", "not_defined", "Bill_Murray", "20180425".toLong)),
+Seq(PII_Scoring_DF("Bike_Status", "station_id", "0".toLong, "0".toLong, "0".toLong, "0".toLong, "0".toLong, "0".toLong, "False", "False", "not_defined", "Bill_Murray", "20180425".toLong)),
+Seq(PII_Scoring_DF("Bike_Status", "time", "0".toLong, "1".toLong, "0".toLong, "0".toLong, "1".toLong, "0".toLong, "False", "False", "not_defined", "Bill_Murray", "20180425".toLong)),
+Seq(PII_Scoring_DF("Patient_Information", "Social_Security_Number","0".toLong, "0".toLong, "1".toLong, "0".toLong, "0".toLong, "0".toLong, "True", "False", "numeric", "root", "1805072217".toLong)),
+Seq(PII_Scoring_DF("Patient_Information", "Patient_First_Name", "0".toLong, "0".toLong, "0".toLong, "0".toLong, "0".toLong, "0".toLong, "True", "False", "all", "root", "1805072217".toLong)),
+Seq(PII_Scoring_DF("Patient_Information", "Patient_Last_Name", "0".toLong, "0".toLong, "0".toLong, "0".toLong, "0".toLong, "0".toLong, "True", "False", "all", "root", "1805072217".toLong)),
+Seq(PII_Scoring_DF("Patient_Information", "Address_Zip_Code", "0".toLong, "0".toLong, "0".toLong, "0".toLong, "0".toLong, "0".toLong, "False", "False", "not_defined", "root", "1805072217".toLong)),
+Seq(PII_Scoring_DF("Patient_Information", "Address_Street", "0".toLong, "0".toLong, "0".toLong, "0".toLong, "0".toLong, "0".toLong, "False", "False", "not_defined", "root", "1805072217".toLong)),
+Seq(PII_Scoring_DF("Patient_Information", "Address_State", "0".toLong, "0".toLong, "0".toLong, "0".toLong, "0".toLong, "0".toLong, "False", "False", "not_defined", "root", "1805072217".toLong)),
+Seq(PII_Scoring_DF("Patient_Information", "Address_City", "0".toLong, "0".toLong, "0".toLong, "0".toLong, "0".toLong, "0".toLong, "False", "False", "not_defined", "root", "1805072217".toLong)),
+Seq(PII_Scoring_DF("Patient_Information", "Patient_ID", "0".toLong, "0".toLong, "0".toLong, "0".toLong, "0".toLong, "0".toLong, "False", "False", "not_defined", "root", "1805072217".toLong)))
+
+var iterator = 2
+var intrimDF = seqArray(0).toDF
+var outputDF = seqArray(0).toDF
+while(iterator <= seqArray.length) {
+  intrimDF = outputDF.union(seqArray(iterator-1).toDF)
+  outputDF = intrimDF
+  iterator = iterator + 1
+}
+
+outputDF.write.format("parquet").mode("overwrite").save("s3://metadatafrb/PII_Scoring/")
+
+spark.sql("REFRESH TABLE PII_Scoring")
+val piiDF = spark.sql("select * from PII_Scoring")
+piiDF.show(100,false)
